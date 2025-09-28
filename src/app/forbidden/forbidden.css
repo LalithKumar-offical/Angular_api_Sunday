@@ -1,0 +1,16 @@
+h1 {
+  font-size: 3rem;
+}
+p {
+  font-size: 1.2rem;
+  margin-top: 10px;
+}
+a {
+  margin-top: 20px;
+  display: inline-block;
+  text-decoration: none;
+  color: blue;
+}
+a:hover {
+  text-decoration: underline;
+}

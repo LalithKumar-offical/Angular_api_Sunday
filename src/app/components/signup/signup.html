@@ -1,0 +1,8 @@
+<form (ngSubmit)="signup()" enctype="multipart/form-data">
+  <input type="text" placeholder="Name" [(ngModel)]="user.userName" name="userName" required>
+  <input type="email" placeholder="Email" [(ngModel)]="user.email" name="email" required>
+  <input type="password" placeholder="Password" [(ngModel)]="user.password" name="password" required>
+  <input type="text" placeholder="PAN" [(ngModel)]="user.pan" name="pan">
+  <input type="file" (change)="onFileSelected($event)">
+  <button type="submit">Signup</button>
+</form>

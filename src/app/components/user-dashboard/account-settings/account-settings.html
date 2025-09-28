@@ -1,0 +1,70 @@
+<div class="account-settings-container">
+  <h2>Account Settings</h2>
+
+  <form (ngSubmit)="update()" #accountForm="ngForm">
+    <!-- Username -->
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        class="form-control"
+        [(ngModel)]="user.userName"
+        name="userName"
+        required
+      />
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        class="form-control"
+        [(ngModel)]="user.email"
+        name="email"
+        required
+      />
+    </div>
+
+    <!-- PAN -->
+    <div class="form-group">
+      <label for="pan">PAN</label>
+      <input
+        id="pan"
+        type="text"
+        class="form-control"
+        [(ngModel)]="user.pan"
+        name="pan"
+      />
+    </div>
+
+    <!-- Balance -->
+    <div class="form-group">
+      <label for="balance">Balance</label>
+      <input
+        id="balance"
+        type="number"
+        class="form-control"
+        [(ngModel)]="user.balance"
+        name="balance"
+        min="0"
+      />
+    </div>
+
+    <!-- File Upload -->
+    <div class="form-group">
+      <label for="file">Profile File (optional)</label>
+      <input
+        id="file"
+        type="file"
+        class="form-control"
+        (change)="onFileSelected($event)"
+      />
+      <small *ngIf="!selectedFile && user.file">Current file is uploaded</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Update Account</button>
+  </form>
+</div>

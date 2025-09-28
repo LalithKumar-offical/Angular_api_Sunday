@@ -1,0 +1,32 @@
+<nav>
+  <ul>
+    <li *ngIf="auth.isAuthenticated() && auth.isAdmin()">
+      <a routerLink="/admin">Admin Dashboard</a>
+    </li>
+
+    <li *ngIf="auth.isAuthenticated() && !auth.isAdmin()">
+      <a routerLink="/user/stocks">Stocks</a>
+    </li>
+    <li *ngIf="auth.isAuthenticated() && !auth.isAdmin()">
+      <a routerLink="/user/watchlist">Watchlist</a>
+    </li>
+    <li *ngIf="auth.isAuthenticated() && !auth.isAdmin()">
+      <a routerLink="/user/portfolio">Portfolio</a>
+    </li>
+    <li *ngIf="auth.isAuthenticated() && !auth.isAdmin()">
+      <a routerLink="/user/account-settings">Account Settings</a>
+    </li>
+
+    <li *ngIf="!auth.isAuthenticated()">
+      <a routerLink="/login">Login</a>
+    </li>
+    <li *ngIf="!auth.isAuthenticated()">
+      <a routerLink="/signup">Signup</a>
+    </li>
+    <li *ngIf="auth.isAuthenticated()">
+      <a (click)="auth.logout()">Logout</a>
+    </li>
+  </ul>
+</nav>
+
+<router-outlet></router-outlet>
