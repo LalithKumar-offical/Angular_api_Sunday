@@ -1,1 +1,20 @@
-<p>navbar works!</p>
+<nav *ngIf="isAuthenticated" class="navbar navbar-expand-lg stock-navbar">
+  <div class="container">
+    <span class="navbar-brand">
+      📈 StockPro
+    </span>
+    <div class="navbar-nav me-auto">
+      <a class="nav-link" routerLink="/user/stocks" routerLinkActive="active">📊 Stocks</a>
+      <a class="nav-link" routerLink="/user/watchlist" routerLinkActive="active">👀 Watchlist</a>
+      <a class="nav-link" routerLink="/user/portfolio" routerLinkActive="active">💼 Portfolio</a>
+      <a class="nav-link" routerLink="/user/account-settings" routerLinkActive="active">⚙️ Settings</a>
+    </div>
+    <div class="d-flex align-items-center">
+      <span class="balance-highlight me-3">💰 ₹{{userBalance | number:'1.2-2'}}</span>
+      <button class="btn btn-outline-light me-2" (click)="toggleTheme()">
+        {{isDarkMode ? '☀️ Light' : '🌙 Dark'}}
+      </button>
+      <button class="btn btn-outline-light" (click)="logout()">🚪 Logout</button>
+    </div>
+  </div>
+</nav>

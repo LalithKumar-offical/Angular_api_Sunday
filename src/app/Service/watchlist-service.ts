@@ -15,7 +15,17 @@ export class WatchlistService {
       .set('userId', userId.toString())
       .set('stockId', stockId.toString());
 
-    return this.http.post<Watchlist | null>(`${this.baseUrl}/add`, null, { params });
+    console.log('Adding to watchlist:', { userId, stockId });
+    console.log('Request URL:', `${this.baseUrl}/add`);
+    console.log('Request params:', params.toString());
+
+    return this.http.post<Watchlist | null>(`${this.baseUrl}/add`, null, { params })
+      .pipe(
+        catchError(error => {
+          console.error('Add to watchlist failed:', error);
+          throw error;
+        })
+      );
   }
 
   removeFromWatchlist(userId: number, stockId: number): Observable<boolean> {
@@ -27,17 +37,23 @@ export class WatchlistService {
   }
   
   buyFromWatchlist(userId: number, stockId: number, boughtPrice: number): Observable<Portfolio | null> {
-    const params = new HttpParams()
-      .set('userId', userId.toString())
-      .set('stockId', stockId.toString())
-      .set('boughtPrice', boughtPrice.toString());
+    // Use direct URL construction to avoid parameter encoding issues
+    const url = `${this.baseUrl}/buy?userId=${userId}&stockId=${stockId}&boughtPrice=${boughtPrice}`;
+    
+    console.log('Buy request URL:', url);
+    console.log('Buy request params:', { userId, stockId, boughtPrice });
 
-    return this.http.post<Portfolio | null>(`${this.baseUrl}/buy`, null, { params })
+    return this.http.post<Portfolio | null>(url, null)
       .pipe(
         catchError(error => {
           console.error('Buy request failed:', error);
+          console.error('Error details:', error.error);
           throw error;
         })
       );
   }
+
+ getUserWatchlist(userId: number): Observable<Watchlist[]> {
+  return this.http.get<Watchlist[]>(`${this.baseUrl}/GetByUser/${userId}`);
+}
 }

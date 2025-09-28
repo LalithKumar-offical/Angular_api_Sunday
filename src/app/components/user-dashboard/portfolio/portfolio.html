@@ -1,1 +1,114 @@
-<p>portfolio works!</p>
+<div class="container">
+  <div class="d-flex align-items-center mb-4">
+    <h2 class="mb-0 me-3">💼 My Portfolio</h2>
+    <span class="badge bg-info">{{portfolios.length}} Holdings</span>
+  </div>
+  
+  <!-- Notifications -->
+  <div *ngFor="let notification of notifications" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+    <strong>📈 Portfolio Update:</strong> {{notification.message}}
+    <button type="button" class="btn-close" (click)="dismissNotification(notification.portfolioId)"></button>
+  </div>
+  
+  <div *ngIf="portfolios.length === 0" class="text-center py-5">
+    <div class="text-muted">
+      <h4>📊 No stocks in portfolio</h4>
+      <p>Start investing to build your portfolio!</p>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6 col-lg-4" *ngFor="let item of portfolios">
+      <div class="card mb-4 stock-card">
+        <div class="card-body">
+          <!-- Stock Header -->
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                   style="width: 50px; height: 50px; background: var(--stock-gradient); color: white; font-weight: bold;">
+                {{item.portfolio.stock?.companyName?.charAt(0) || 'S'}}
+              </div>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1 fw-bold">{{item.portfolio.stock?.companyName}}</h6>
+              <span [class]="getStatusClass(getStatusName(item.portfolio.stock_Status))">
+                {{getStatusName(item.portfolio.stock_Status)}}
+              </span>
+            </div>
+          </div>
+
+          <!-- Price Information -->
+          <div class="mb-3">
+            <div class="row text-center">
+              <div class="col-6">
+                <small class="text-muted d-block">Bought Price</small>
+                <strong class="text-primary">₹{{item.portfolio.boughtPrice | number:'1.2-2'}}</strong>
+              </div>
+              <div class="col-6">
+                <small class="text-muted d-block">Current Price</small>
+                <strong class="price-up">₹{{item.portfolio.stock?.priceofStock | number:'1.2-2'}}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price Graph -->
+          <div class="mb-3" *ngIf="item.portfolio.stock?.priceofStock">
+            <small class="text-muted d-block mb-2">📈 Price Movement</small>
+            <div class="price-graph-container">
+              <div class="price-graph">
+                <div class="price-bar bought-price" 
+                     [style.height.%]="50">
+                  <span class="price-label">₹{{item.portfolio.boughtPrice | number:'1.2-2'}}</span>
+                </div>
+                <div class="price-arrow" 
+                     [class.arrow-up]="getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit"
+                     [class.arrow-down]="!getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit">
+                  {{getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit ? '↗️' : '↘️'}}
+                </div>
+                <div class="price-bar current-price" 
+                     [style.height.%]="getGraphHeight(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0)"
+                     [class.profit-bar]="getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit"
+                     [class.loss-bar]="!getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit">
+                  <span class="price-label">₹{{item.portfolio.stock?.priceofStock | number:'1.2-2'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profit/Loss -->
+          <div class="mb-3" *ngIf="item.portfolio.stock?.priceofStock">
+            <div class="text-center p-2 rounded" 
+                 [style.background-color]="getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit ? 'rgba(5, 150, 105, 0.1)' : 'rgba(220, 38, 38, 0.1)'">
+              <small class="text-muted d-block">P&L</small>
+              <strong [class]="getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit ? 'price-up' : 'price-down'">
+                {{getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).isProfit ? '+' : ''}}₹{{getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).amount | number:'1.2-2'}}
+                ({{getProfitLoss(item.portfolio.boughtPrice, item.portfolio.stock?.priceofStock || 0).percentage | number:'1.2-2'}}%)
+              </strong>
+            </div>
+          </div>
+
+          <!-- Purchase Date -->
+          <div class="mb-3">
+            <small class="text-muted">🗓️ Bought: {{item.portfolio.boughtDate | date:'short'}}</small>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-grid gap-2" *ngIf="item.portfolio.stock_Status === 1">
+            <button class="btn btn-stock-danger btn-sm" 
+                    (click)="sellStock(item.portfolio.portfolioId, item.portfolio.stock?.companyName || 'Stock')">
+              💰 Sell Stock
+            </button>
+          </div>
+          
+          <div *ngIf="item.portfolio.stock_Status === 0" class="text-center">
+            <small class="text-warning">⏳ Waiting for admin approval</small>
+          </div>
+          
+          <div *ngIf="item.portfolio.stock_Status === 2" class="text-center">
+            <small class="text-danger">❌ Purchase was rejected</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

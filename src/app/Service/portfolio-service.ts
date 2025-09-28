@@ -9,6 +9,10 @@ import { Portfolio, PortfolioDto } from '../Models/Interfaces';
 export class PortfolioService {
   private http = inject(HttpClient);
   private baseUrl = 'https://localhost:7076/api/Portfolio'; // your API base
+  
+  // Demo data storage
+  private demoPendingPortfolios: Portfolio[] = [];
+  private demoPortfolioId = 1;
 
   // 1️⃣ User requests a stock purchase (Pending status)
   requestPurchase(userId: number, stockId: number): Observable<Portfolio> {
@@ -46,5 +50,10 @@ export class PortfolioService {
   // 5️⃣ Get all portfolios of a user with profit/loss messages
   getUserPortfolios(userId: number): Observable<PortfolioDto[]> {
     return this.http.get<PortfolioDto[]>(`${this.baseUrl}/user/${userId}`);
+  }
+
+  // Mark message as read (you'll need to add this endpoint to backend)
+  markMessageAsRead(portfolioId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/message/read/${portfolioId}`, {});
   }
 }

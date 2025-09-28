@@ -1,25 +1,28 @@
 import { Routes } from '@angular/router';
-import { Login as LoginComponent } from './components/login/login';
+import { LoginComponent } from './components/login/login';
 import { SignupComponent } from './components/signup/signup';
 import { UserDashboardComponent } from './components/user-dashboard/user-dashboard';
 import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard';
 import { StocksComponent } from './components/user-dashboard/stocks/stocks';
 import { WatchlistComponent } from './components/user-dashboard/watchlist/watchlist';
-import { Portfolio as PortfolioComponent } from './components/user-dashboard/portfolio/portfolio';
+import { PortfolioComponent } from './components/user-dashboard/portfolio/portfolio';
 import { AccountSettingsComponent } from './components/user-dashboard/account-settings/account-settings';
 import { ForbiddenComponent } from './forbidden/forbidden';
+import { AuthGuard } from './guards/auth-guard';
 
-export const rout: Routes = [
+export const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
   {
     path: 'admin',
     component: AdminDashboardComponent,
-    // add your guard here
+    canActivate: [AuthGuard],
+    data: { roles: ['Admin'] }
   },
   {
     path: 'user',
     component: UserDashboardComponent,
+    canActivate: [AuthGuard],
     children: [
       { path: 'stocks', component: StocksComponent },
       { path: 'watchlist', component: WatchlistComponent },

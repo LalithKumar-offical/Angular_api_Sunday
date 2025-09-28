@@ -1,0 +1,74 @@
+<div class="container">
+  <div class="d-flex align-items-center mb-4">
+    <h2 class="mb-0 me-3">⚙️ Account Settings</h2>
+    <span class="badge bg-primary">Profile Management</span>
+  </div>
+
+  <div class="row">
+    <!-- Profile Information -->
+    <div class="col-md-8">
+      <div class="card stock-card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">👤 Profile Information</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="update()" #accountForm="ngForm">
+            <div class="mb-3">
+              <label for="username" class="form-label fw-semibold">Username</label>
+              <input id="username" type="text" class="form-control" [(ngModel)]="user.userName" name="userName" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold">Email</label>
+              <input id="email" type="email" class="form-control" [(ngModel)]="user.email" name="email" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="pan" class="form-label fw-semibold">PAN</label>
+              <input id="pan" type="text" class="form-control" [(ngModel)]="user.pan" name="pan">
+            </div>
+
+            <div class="mb-3">
+              <label for="file" class="form-label fw-semibold">Profile Document</label>
+              <input id="file" type="file" class="form-control" (change)="onFileSelected($event)">
+              <small class="form-text text-muted" *ngIf="!selectedFile && user.file">📄 Current file is uploaded</small>
+            </div>
+
+            <button type="submit" class="btn btn-stock-primary">💾 Update Profile</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance Management -->
+    <div class="col-md-4">
+      <div class="card stock-card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">💰 Balance Management</h5>
+        </div>
+        <div class="card-body">
+          <div class="text-center mb-3">
+            <div class="balance-highlight d-inline-block">
+              <strong>₹{{user.balance || 0 | number:'1.2-2'}}</strong>
+            </div>
+            <small class="d-block text-muted mt-1">Current Balance</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="addBalance" class="form-label fw-semibold">Add Money</label>
+            <div class="input-group">
+              <span class="input-group-text">₹</span>
+              <input id="addBalance" type="number" class="form-control" [(ngModel)]="addBalanceAmount" min="1" placeholder="Amount">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-stock-success w-100" (click)="addBalance()">
+            💳 Add Balance
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>

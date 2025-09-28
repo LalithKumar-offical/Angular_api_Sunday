@@ -33,6 +33,11 @@ export class StockService {
     return this.http.post<Stock>(this.baseUrl, formData);
   }
 
+  // Create stock (alias for addStock)
+  createStock(stock: Partial<Stock>, file?: File): Observable<Stock> {
+    return this.addStock(stock, file);
+  }
+
   // Update stock (only fields provided will be updated)
   updateStock(stockId: number, stock: Partial<Stock>, file?: File): Observable<Stock> {
     const formData = new FormData();

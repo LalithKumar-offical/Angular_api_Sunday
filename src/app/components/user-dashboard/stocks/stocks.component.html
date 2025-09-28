@@ -1,0 +1,81 @@
+<div class="container">
+  <div class="d-flex align-items-center mb-4">
+    <h2 class="mb-0 me-3">📈 Available Stocks</h2>
+    <span class="badge bg-success fs-6">🔥 Live Market</span>
+  </div>
+  
+  <!-- Filters -->
+  <div class="card mb-4 p-4 stock-card">
+    <div class="row">
+      <div class="col-md-4">
+        <input class="form-control" [(ngModel)]="filterName" placeholder="Search by company name">
+        <button class="btn btn-stock-primary btn-sm mt-2" (click)="searchByName()">🔍 Search</button>
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" type="date" [(ngModel)]="fromDate" placeholder="From Date">
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" type="date" [(ngModel)]="toDate" placeholder="To Date">
+        <button class="btn btn-stock-primary btn-sm mt-2" (click)="filterByDate()">📅 Filter by Date</button>
+      </div>
+    </div>
+    <button class="btn btn-outline-primary btn-sm mt-3" (click)="loadStocks()">🔄 Clear Filters</button>
+  </div>
+
+  <!-- Stocks List -->
+  <div class="row">
+    <div class="col-md-4" *ngFor="let stock of stocks">
+      <div class="card mb-3 stock-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+              <img *ngIf="stock.logo" [src]="getStockLogoUrl(stock.logo)" 
+                   alt="{{stock.companyName}} Logo" 
+                   class="rounded-circle" 
+                   style="width: 50px; height: 50px; object-fit: cover; cursor: pointer; border: 3px solid var(--stock-primary);"
+                   (error)="onImageError($event)"
+                   (click)="showImageInModal(getStockLogoUrl(stock.logo), stock.companyName || 'Stock Logo')">
+              <div *ngIf="!stock.logo" class="rounded-circle d-flex align-items-center justify-content-center" 
+                   style="width: 50px; height: 50px; background: var(--stock-gradient); color: white; font-weight: bold;">
+                {{stock.companyName?.charAt(0) || 'S'}}
+              </div>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1 fw-bold">{{stock.companyName}}</h6>
+              <small class="text-muted">🔄 {{stock.lastUpdatedDate | date:'short'}}</small>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="d-flex align-items-center">
+              <span class="h5 mb-0 price-up">₹{{stock.priceofStock | number:'1.2-2'}}</span>
+              <span class="ms-2 badge bg-success">📈 +2.5%</span>
+            </div>
+          </div>
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary btn-sm" (click)="addToWatchlist(stock.stockId)">
+              👀 Add to Watchlist
+            </button>
+            <button class="btn btn-stock-primary btn-sm" (click)="buyStock(stock.stockId, stock.priceofStock)">
+              💰 Buy Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image Modal -->
+<div *ngIf="showImageModal" class="modal d-block" style="background-color: rgba(0,0,0,0.8);" (click)="closeImageModal()">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h5 class="modal-title">{{modalImageAlt}}</h5>
+        <button type="button" class="btn-close" (click)="closeImageModal()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img [src]="modalImageSrc" [alt]="modalImageAlt" class="img-fluid" style="max-height: 70vh;">
+      </div>
+    </div>
+  </div>
+</div>

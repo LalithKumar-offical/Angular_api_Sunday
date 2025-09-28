@@ -1,0 +1,275 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+      <h2 class="mb-0 me-3">🛡️ Admin Dashboard</h2>
+      <span class="badge bg-warning text-dark">🔒 Admin Panel</span>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary" (click)="toggleTheme()">
+        {{isDarkMode ? '☀️ Light' : '🌙 Dark'}}
+      </button>
+      <button class="btn btn-stock-danger" (click)="logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link fw-semibold" [class.active]="activeTab === 'users'" (click)="activeTab = 'users'">
+        👥 Users
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link fw-semibold" [class.active]="activeTab === 'portfolios'" (click)="activeTab = 'portfolios'">
+        📈 Stock Approvals
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link fw-semibold" [class.active]="activeTab === 'accounts'" (click)="activeTab = 'accounts'">
+        ✅ Account Verification
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link fw-semibold" [class.active]="activeTab === 'stocks'" (click)="activeTab = 'stocks'">
+        📊 Manage Stocks
+      </a>
+    </li>
+  </ul>
+
+  <!-- Users -->
+  <div *ngIf="activeTab === 'users'" class="mt-3">
+    <h4>All Users</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Verified</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{user.userId}}</td>
+          <td>{{user.userName}}</td>
+          <td>{{user.email}}</td>
+          <td>{{user.role}}</td>
+          <td>{{user.isVerfied ? 'Yes' : 'No'}}</td>
+          <td>{{user.balance}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pending Portfolios -->
+  <div *ngIf="activeTab === 'portfolios'" class="mt-3">
+    <h4>Pending Stock Approvals</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Portfolio ID</th>
+          <th>User ID</th>
+          <th>Stock ID</th>
+          <th>Bought Price</th>
+          <th>User Balance</th>
+          <th>Status</th>
+          <th>Bought Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of pendingPortfolios" [class.table-warning]="hasInsufficientFunds(p.userId, p.boughtPrice)">
+          <td>{{p.portfolioId}}</td>
+          <td>{{p.userId}}</td>
+          <td>{{p.stockId}}</td>
+          <td>₹{{p.boughtPrice | number:'1.2-2'}}</td>
+          <td>₹{{getUserBalance(p.userId) | number:'1.2-2'}}</td>
+          <td>
+            <span *ngIf="hasInsufficientFunds(p.userId, p.boughtPrice)" class="badge bg-danger">Insufficient Funds</span>
+            <span *ngIf="!hasInsufficientFunds(p.userId, p.boughtPrice)" class="badge bg-success">Sufficient Funds</span>
+          </td>
+          <td>{{p.boughtDate | date}}</td>
+          <td>
+            <button class="btn btn-success btn-sm" (click)="approvePortfolio(p.portfolioId, true)">Approve</button>
+            <button class="btn btn-danger btn-sm" (click)="approvePortfolio(p.portfolioId, false)">Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Accounts to Verify -->
+  <div *ngIf="activeTab === 'accounts'" class="mt-3">
+    <h4>Accounts Pending Verification</h4>
+    <div class="row">
+      <div class="col-md-6" *ngFor="let u of pendingUsers">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6>{{u.userName}} (ID: {{u.userId}})</h6>
+            <p><strong>Email:</strong> {{u.email}}</p>
+            <p><strong>PAN:</strong> {{u.pan || 'Not provided'}}</p>
+            <p><strong>Balance:</strong> ₹{{u.balance || 0}}</p>
+            
+            <!-- User File Display -->
+            <div *ngIf="u.file" class="mb-3">
+              <strong>Uploaded Document:</strong><br>
+              <a [href]="getFileUrl(u.file)" target="_blank" class="btn btn-primary btn-sm">
+                📄 View Document
+              </a>
+              <br><small class="text-muted mt-2 d-block">{{u.file}}</small>
+            </div>
+            <div *ngIf="!u.file" class="mb-3">
+              <span class="text-muted">No document uploaded</span>
+            </div>
+            
+            <button class="btn btn-success btn-sm" (click)="approveUser(u)">Verify Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Management -->
+  <div *ngIf="activeTab === 'stocks'" class="mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="mb-0">📊 Manage Stocks</h4>
+      <div class="d-flex gap-2">
+        <button class="btn btn-stock-primary btn-sm" (click)="showCreateForm = !showCreateForm">
+          ➕ {{showCreateForm ? 'Cancel' : 'Create Stock'}}
+        </button>
+        <span class="badge bg-info">{{stocks.length}} Stocks</span>
+      </div>
+    </div>
+
+    <!-- Create Stock Form -->
+    <div *ngIf="showCreateForm" class="card stock-card mb-4">
+      <div class="card-header">
+        <h6 class="mb-0">➕ Create New Stock</h6>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="createStock()" #createForm="ngForm">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Company Name</label>
+                <input type="text" class="form-control" [(ngModel)]="newStock.companyName" name="companyName" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Stock Price</label>
+                <input type="number" class="form-control" [(ngModel)]="newStock.priceofStock" name="price" min="1" step="0.01" required>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Stock Logo</label>
+            <input type="file" class="form-control" accept="image/*" (change)="onNewStockLogoSelected($event)">
+          </div>
+          <button type="submit" class="btn btn-stock-success" [disabled]="!createForm.valid">
+            💾 Create Stock
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 col-lg-4" *ngFor="let stock of stocks">
+        <div class="card mb-4 stock-card">
+          <div class="card-body">
+            <!-- Stock Header -->
+            <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <img *ngIf="stock.logo && editingStock?.stockId !== stock.stockId" 
+                     [src]="getStockLogoUrl(stock.logo)" 
+                     alt="{{stock.companyName}} Logo" 
+                     class="rounded-circle" 
+                     style="width: 50px; height: 50px; object-fit: cover; cursor: pointer; border: 3px solid var(--stock-primary);"
+                     (error)="onImageError($event)"
+                     (click)="showImageInModal(getStockLogoUrl(stock.logo), stock.companyName || 'Stock Logo')">
+                <div *ngIf="!stock.logo && editingStock?.stockId !== stock.stockId" 
+                     class="rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 50px; height: 50px; background: var(--stock-gradient); color: white; font-weight: bold;">
+                  {{stock.companyName?.charAt(0) || 'S'}}
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <div *ngIf="editingStock?.stockId !== stock.stockId">
+                  <h6 class="mb-1 fw-bold">{{stock.companyName}}</h6>
+                  <small class="text-muted">ID: {{stock.stockId}}</small>
+                </div>
+                <div *ngIf="editingStock?.stockId === stock.stockId">
+                  <input class="form-control mb-2" 
+                         [value]="editingStock?.companyName"
+                         (input)="editingStock && (editingStock.companyName = $any($event.target).value)"
+                         placeholder="Company Name">
+                </div>
+              </div>
+            </div>
+
+            <!-- Price Section -->
+            <div class="mb-3">
+              <div *ngIf="editingStock?.stockId !== stock.stockId">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span class="h5 mb-0 price-up">₹{{stock.priceofStock | number:'1.2-2'}}</span>
+                  <span class="badge bg-success">📈 Active</span>
+                </div>
+                <small class="text-muted">🕒 {{stock.lastUpdatedDate | date:'short'}}</small>
+              </div>
+              <div *ngIf="editingStock?.stockId === stock.stockId">
+                <input type="number" 
+                       class="form-control mb-2" 
+                       [value]="editingStock?.priceofStock"
+                       (input)="editingStock && (editingStock.priceofStock = +$any($event.target).value)"
+                       placeholder="Price">
+                <input type="file" 
+                       class="form-control mb-2" 
+                       accept="image/*"
+                       (change)="onLogoFileSelected($event)"
+                       title="Upload new logo">
+                <small class="text-muted">📷 Select new logo (optional)</small>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+              <div *ngIf="editingStock?.stockId !== stock.stockId" class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm flex-fill" (click)="startEdit(stock)">
+                  ✏️ Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm flex-fill" (click)="deleteStock(stock.stockId)">
+                  🗑️ Delete
+                </button>
+              </div>
+              <div *ngIf="editingStock?.stockId === stock.stockId" class="d-flex gap-2">
+                <button class="btn btn-success btn-sm flex-fill" (click)="editingStock && updateStock(editingStock)">
+                  💾 Save
+                </button>
+                <button class="btn btn-secondary btn-sm flex-fill" (click)="cancelEdit()">
+                  ❌ Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image Modal -->
+<div *ngIf="showImageModal" class="modal d-block" style="background-color: rgba(0,0,0,0.8);" (click)="closeImageModal()">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h5 class="modal-title">{{modalImageAlt}}</h5>
+        <button type="button" class="btn-close" (click)="closeImageModal()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img [src]="modalImageSrc" [alt]="modalImageAlt" class="img-fluid" style="max-height: 70vh;">
+      </div>
+    </div>
+  </div>
+</div>
